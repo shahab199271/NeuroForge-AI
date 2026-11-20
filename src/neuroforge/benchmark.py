@@ -25,7 +25,8 @@ def latency_summary(samples_ms: list[float]) -> dict:
     if not samples_ms or any(x <= 0 or not math.isfinite(x) for x in samples_ms):
         raise ValueError("Need nonempty positive finite latency measurements")
     ordered = sorted(samples_ms)
-    percentile = lambda p: ordered[math.ceil(p * len(ordered)) - 1]
+    def percentile(p):
+        return ordered[math.ceil(p * len(ordered)) - 1]
     return {
         "mean_ms": round(statistics.mean(ordered), 3),
         "p50_ms": round(percentile(0.50), 3),
