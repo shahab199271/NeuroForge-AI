@@ -23,8 +23,8 @@ flowchart LR
 
 - **Real LLM fine-tuning:** optimize LoRA adapter parameters on sentiment instructions, instead of merely calling a hosted LLM API.
 - **Optional QLoRA:** NF4 4-bit base-model loading for CUDA-compatible training environments.
-- **Evaluation:** held-out IMDb test set, accuracy, macro-F1 and invalid-answer rate.
-- **Benchmark:** warm-up, median/p95 single-request latency, requests/sec and peak allocated GPU memory.
+- **Knowledge distillation:** frozen larger Qwen teacher + smaller LoRA student, temperature-scaled token KL and answer-only supervised loss.\n- **Offline integration tests:** tiny randomly initialized teacher/student, gradient-flow checks and adapter save/reload.\n- **Evaluation:** held-out IMDb test set, accuracy, macro-F1 and invalid-answer rate.
+- **Benchmark:** warm-up, empirical p50/p90/p95/p99 single-request latency, cold model-load time, sequential requests/sec, GPU allocated/reserved memory and process RSS.
 - **Serving:** local FastAPI endpoint with lazy model loading and typed requests.
 - **Engineering:** Python package, tests, linting, GitHub Actions and Docker support.
 
@@ -53,11 +53,11 @@ python -m neuroforge.train --qlora --output-dir outputs/qwen-qlora --train-sampl
 
 The training objective masks prompt tokens and optimizes only the assistant's target sentiment label. A stratified validation subset comes from the original IMDb training split. The IMDb test split is reserved for reporting.
 
-## Evaluate and benchmark
+## Teacher–student knowledge distillation\n\nThe larger teacher model is frozen; the smaller LoRA student is trained using temperature-scaled KL divergence on **answer token positions only**, blended with supervised cross-entropy. The script checks tokenizer vocabulary compatibility before training. Keep both model revisions and the same prompt protocol for fair comparisons. The CPU/GPU memory cost of *training with a teacher* is higher than serving the smaller student alone.\n\n```bash\npython -m neuroforge.distillation --teacher Qwen/Qwen2.5-1.5B-Instruct --student Qwen/Qwen2.5-0.5B-Instruct --output-dir outputs/distilled-student --train-samples 1000 --eval-samples 200\npython -m neuroforge.evaluate --adapter outputs/distilled-student --output-json outputs/distilled_evaluation.json\n```\n\nThe commands are not evidence of completed training. See [distillation protocol](docs/DISTILLATION.md).\n\n## Evaluate and benchmark
 
 ```bash
 python -m neuroforge.evaluate --test-samples 200 --output-json outputs/baseline_metrics.json\npython -m neuroforge.evaluate --adapter outputs/qwen-lora --test-samples 200 --output-json outputs/lora_metrics.json
-python -m neuroforge.benchmark --adapter outputs/qwen-lora --iterations 30 --warmup 5
+python -m neuroforge.benchmark --adapter outputs/qwen-lora --iterations 50 --warmup 10 --output-json outputs/lora_benchmark.json
 # To compare 4-bit inference: add --load-in-4bit
 ```
 
@@ -77,7 +77,7 @@ For a valid prediction, the API returns e.g. `{"sentiment":"positive","raw_outpu
 
 1. Verify LoRA and QLoRA GPU training end-to-end with pinned versions and reproducible runs.
 2. Compare FP16/BF16 against supported 4-bit inference and measure the accuracy–latency–memory trade-off.
-3. Add a separate teacher–student **knowledge distillation** pipeline and evaluate its benefits. **Distillation is planned, not implemented in this release.**
+3. Run the implemented teacher–student **knowledge distillation** pipeline on a suitable GPU, evaluate the resulting student, and compare with direct LoRA training. No GPU validation or empirical improvement is claimed.
 4. Add additional model families, model/export formats, dashboards and deployment hardening.
 
 ## Responsible publication
