@@ -1,6 +1,7 @@
 """Local FastAPI inference interface with lazy model loading."""
 import os
 from functools import lru_cache
+from threading import Lock
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -8,6 +9,7 @@ from pydantic import BaseModel, Field
 from .core import BASE_MODEL, load_model, predict
 
 app = FastAPI(title="NeuroForge AI", version="0.1.0")
+_inference_lock = Lock()
 
 
 class SentimentRequest(BaseModel):
@@ -42,7 +44,12 @@ def analyze(request: SentimentRequest):
         raise HTTPException(
             status_code=503, detail="Model unavailable; check adapter configuration"
         ) from exc
-    predicted, raw = predict(request.text, tokenizer, model)
+    try:
+        # Serialization prevents simultaneous model.generate() calls on one GPU.
+        with _inference_lock:
+            predicted, raw = predict(request.text, tokenizer, model)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Model inference failed") from exc
     if predicted is None:
-        raise HTTPException(status_code=422, detail=f"Unexpected model response: {raw[:80]}")
+        raise HTTPException(status_code=422, detail="Model returned an invalid sentiment label")
     return SentimentResponse(sentiment=predicted, raw_output=raw)
