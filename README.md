@@ -56,12 +56,12 @@ The training objective masks prompt tokens and optimizes only the assistant's ta
 ## Evaluate and benchmark
 
 ```bash
-python -m neuroforge.evaluate --adapter outputs/qwen-lora --test-samples 200
+python -m neuroforge.evaluate --test-samples 200 --output-json outputs/baseline_metrics.json\npython -m neuroforge.evaluate --adapter outputs/qwen-lora --test-samples 200 --output-json outputs/lora_metrics.json
 python -m neuroforge.benchmark --adapter outputs/qwen-lora --iterations 30 --warmup 5
 # To compare 4-bit inference: add --load-in-4bit
 ```
 
-These are *example commands*, not evidence of completed experiments. Record GPU, software versions, seed, dataset subset, batch size, model revision, adapter configuration, F1, latency and memory for each experiment. See [experimental protocol](docs/EXPERIMENTS.md).
+These are *example commands*, not evidence of completed experiments. Record GPU, software versions, seed, dataset subset, batch size, model revision, adapter configuration, F1, latency and memory for each experiment. See [experimental protocol](docs/EXPERIMENTS.md) and [pre-results audit](docs/PRE_RELEASE_AUDIT.md).
 
 ## Local API
 
