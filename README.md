@@ -1,6 +1,6 @@
 # NeuroForge AI
 
-**Fine-tune · Compress · Benchmark · Deploy**
+**Fine-tune · Compress · Optimize · Benchmark · Deploy**
 
 A reproducible, open-source LLM engineering starter focused on **parameter-efficient language-model adaptation**, sentiment classification, efficient inference and measurable trade-offs.
 
@@ -23,10 +23,34 @@ flowchart LR
 
 - **Real LLM fine-tuning:** optimize LoRA adapter parameters on sentiment instructions, instead of merely calling a hosted LLM API.
 - **Optional QLoRA:** NF4 4-bit base-model loading for CUDA-compatible training environments.
-- **Knowledge distillation:** frozen larger Qwen teacher + smaller LoRA student, temperature-scaled token KL and answer-only supervised loss.\n- **Offline integration tests:** tiny randomly initialized teacher/student, gradient-flow checks and adapter save/reload.\n- **Evaluation:** held-out IMDb test set, accuracy, macro-F1 and invalid-answer rate.
+- **Knowledge distillation:** frozen larger Qwen teacher + smaller LoRA student, temperature-scaled token KL and answer-only supervised loss.
+- **Offline integration tests:** tiny randomly initialized teacher/student, gradient-flow checks and adapter save/reload.
+- **Evaluation:** held-out IMDb test set, accuracy, macro-F1 and invalid-answer rate.
 - **Benchmark:** warm-up, empirical p50/p90/p95/p99 single-request latency, cold model-load time, sequential requests/sec, GPU allocated/reserved memory and process RSS.
 - **Serving:** local FastAPI endpoint with lazy model loading and typed requests.
 - **Engineering:** Python package, tests, linting, GitHub Actions and Docker support.
+
+## Experimental GPU kernels
+
+The kernel lab implements six opt-in Triton forward operators: RMSNorm, softmax,
+SwiGLU, residual RMSNorm, split-half RoPE and tiled GEMM with shape-aware autotuning.
+PyTorch reference implementations provide CPU and gradient-capable fallbacks.
+The microbenchmarks record CUDA-event latency, numerical error and raw samples;
+the advanced suite also provides analytical roofline estimates.
+
+GPU compilation, numerical validation and performance measurements remain pending.
+The operators do not automatically replace Qwen modules. The current target is
+NVIDIA Ampere or newer on a compatible Linux/WSL2 PyTorch/Triton environment.
+
+- [Basic kernels and validation](docs/GPU_KERNEL_PHASE1.md)
+- [Advanced kernels and roofline methodology](docs/GPU_KERNEL_PHASE2.md)
+
+```bash
+pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/test_kernel_roofline.py
+# With a compatible CUDA/Triton installation:
+python -m neuroforge.kernel_benchmark --dtype float16
+python -m neuroforge.advanced_benchmark --dtype float16
+```
 
 ## Setup
 
@@ -53,10 +77,22 @@ python -m neuroforge.train --qlora --output-dir outputs/qwen-qlora --train-sampl
 
 The training objective masks prompt tokens and optimizes only the assistant's target sentiment label. A stratified validation subset comes from the original IMDb training split. The IMDb test split is reserved for reporting.
 
-## Teacher–student knowledge distillation\n\nThe larger teacher model is frozen; the smaller LoRA student is trained using temperature-scaled KL divergence on **answer token positions only**, blended with supervised cross-entropy. The script checks tokenizer vocabulary compatibility before training. Keep both model revisions and the same prompt protocol for fair comparisons. The CPU/GPU memory cost of *training with a teacher* is higher than serving the smaller student alone.\n\n```bash\npython -m neuroforge.distillation --teacher Qwen/Qwen2.5-1.5B-Instruct --student Qwen/Qwen2.5-0.5B-Instruct --output-dir outputs/distilled-student --train-samples 1000 --eval-samples 200\npython -m neuroforge.evaluate --adapter outputs/distilled-student --output-json outputs/distilled_evaluation.json\n```\n\nThe commands are not evidence of completed training. See [distillation protocol](docs/DISTILLATION.md).\n\n## Evaluate and benchmark
+## Teacher–student knowledge distillation
+
+The larger teacher model is frozen; the smaller LoRA student is trained using temperature-scaled KL divergence on **answer token positions only**, blended with supervised cross-entropy. The script checks tokenizer vocabulary compatibility before training. Keep both model revisions and the same prompt protocol for fair comparisons. The CPU/GPU memory cost of *training with a teacher* is higher than serving the smaller student alone.
 
 ```bash
-python -m neuroforge.evaluate --test-samples 200 --output-json outputs/baseline_metrics.json\npython -m neuroforge.evaluate --adapter outputs/qwen-lora --test-samples 200 --output-json outputs/lora_metrics.json
+python -m neuroforge.distillation --teacher Qwen/Qwen2.5-1.5B-Instruct --student Qwen/Qwen2.5-0.5B-Instruct --output-dir outputs/distilled-student --train-samples 1000 --eval-samples 200
+python -m neuroforge.evaluate --adapter outputs/distilled-student --output-json outputs/distilled_evaluation.json
+```
+
+The commands are not evidence of completed training. See [distillation protocol](docs/DISTILLATION.md).
+
+## Evaluate and benchmark
+
+```bash
+python -m neuroforge.evaluate --test-samples 200 --output-json outputs/baseline_metrics.json
+python -m neuroforge.evaluate --adapter outputs/qwen-lora --test-samples 200 --output-json outputs/lora_metrics.json
 python -m neuroforge.benchmark --adapter outputs/qwen-lora --iterations 50 --warmup 10 --output-json outputs/lora_benchmark.json
 # To compare 4-bit inference: add --load-in-4bit
 ```
