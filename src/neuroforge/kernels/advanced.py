@@ -6,12 +6,14 @@ import torch
 from .ops import _backend, _validate, rmsnorm
 
 
-def _match(x, y):
+def _match(x: torch.Tensor, y: torch.Tensor) -> None:
     if x.device != y.device or x.dtype != y.dtype:
         raise ValueError('Inputs must share dtype and device')
 
 
-def residual_rmsnorm(x, residual, weight, eps=1e-6, *, backend='auto'):
+def residual_rmsnorm(x: torch.Tensor, residual: torch.Tensor, weight: torch.Tensor,
+                     eps: float = 1e-6, *, backend: str = 'auto'
+                     ) -> tuple[torch.Tensor, torch.Tensor]:
     """Return normalized activation and residual sum, rounded to input dtype."""
     _validate(x)
     _match(x, residual)
@@ -27,7 +29,8 @@ def residual_rmsnorm(x, residual, weight, eps=1e-6, *, backend='auto'):
     return rmsnorm(summed, weight, eps, backend='torch'), summed
 
 
-def rope(x, cos, sin, *, backend='auto'):
+def rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor,
+         *, backend: str = 'auto') -> torch.Tensor:
     """Split-half RoPE. cos/sin have shape (*x.shape[:-1], head_dim/2)."""
     _validate(x)
     _match(x, cos)
@@ -43,8 +46,8 @@ def rope(x, cos, sin, *, backend='auto'):
     return torch.cat((a*c-b*s, b*c+a*s), dim=-1).to(x.dtype)
 
 
-def matmul(a, b, *, backend='auto'):
-    """2-D GEMM, FP32 accumulation; IEEE FP32 inputs, no implicit TF32."""
+def matmul(a: torch.Tensor, b: torch.Tensor, *, backend: str = 'auto') -> torch.Tensor:
+    """2-D GEMM. Triton uses IEEE FP32; PyTorch follows caller precision settings."""
     _validate(a)
     _validate(b)
     _match(a, b)
