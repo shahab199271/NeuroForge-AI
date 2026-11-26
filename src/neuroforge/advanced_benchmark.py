@@ -28,6 +28,8 @@ def _case(op, args, cost, warmup, iterations, tol, ceilings):
     ref, actual = outputs['torch'], outputs['triton']
     if not isinstance(ref, tuple):
         ref, actual = (ref,), (actual,)
+    if not isinstance(actual, tuple) or len(actual) != len(ref):
+        raise RuntimeError('Backend output structure mismatch')
     errors = []
     for a, b in zip(actual, ref):
         torch.testing.assert_close(a, b, rtol=tol, atol=tol)
@@ -82,12 +84,17 @@ def main():
               'python':platform.python_version(), 'dtype':a.dtype, 'seed':42,
               'warmup':a.warmup, 'iterations':a.iterations, 'hardware_ceilings':ceilings,
               'scope':'allocating forward wrappers; logical bytes, not measured DRAM traffic',
+              'platform':platform.platform(),
               'results':[]}
     old_precision = torch.get_float32_matmul_precision()
     old_tf32 = torch.backends.cuda.matmul.allow_tf32
+    old_fp16 = torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction
+    old_bf16 = torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction
     try:
         torch.set_float32_matmul_precision('highest')
         torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = False
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
         with torch.inference_mode():
             for rows in a.rows:
                 x = torch.randn(rows,a.width,device='cuda',dtype=dtype)
@@ -105,6 +112,8 @@ def main():
     finally:
         torch.set_float32_matmul_precision(old_precision)
         torch.backends.cuda.matmul.allow_tf32 = old_tf32
+        torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = old_fp16
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = old_bf16
     output = json.dumps(report,indent=2,allow_nan=False)
     print(output)
     if a.output_json:
