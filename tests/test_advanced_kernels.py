@@ -53,3 +53,31 @@ def test_grad_and_validation():
         matmul(torch.ones(2, 3), torch.ones(4, 2))
     with pytest.raises(RuntimeError):
         matmul(torch.ones(2, 3), torch.ones(3, 2), backend='triton')
+
+
+@pytest.mark.parametrize('width', [1, 8192, 8193])
+def test_residual_boundary_cpu(width):
+    x = torch.linspace(-1, 1, width).reshape(1, width)
+    w = torch.ones(width)
+    y, summed = residual_rmsnorm(x, -x, w)
+    torch.testing.assert_close(summed, torch.zeros_like(x))
+    torch.testing.assert_close(y, torch.zeros_like(x))
+
+
+def test_rope_identity_and_rotation():
+    x = torch.tensor([[1., 2., 3., 4.]])
+    c, s = torch.ones(1, 2), torch.zeros(1, 2)
+    torch.testing.assert_close(rope(x, c, s), x)
+    torch.testing.assert_close(rope(x, s, c), torch.tensor([[-3., -4., 1., 2.]]))
+
+
+def test_noncontiguous_gemm_cpu():
+    a = torch.arange(24, dtype=torch.float32).reshape(4, 6)[:, ::2]
+    b = torch.arange(15, dtype=torch.float32).reshape(5, 3).T
+    torch.testing.assert_close(matmul(a, b), (a.double() @ b.double()).float())
+
+
+@pytest.mark.parametrize('eps', [0., -1., float('nan'), float('inf')])
+def test_residual_invalid_epsilon(eps):
+    with pytest.raises(ValueError):
+        residual_rmsnorm(torch.ones(2, 4), torch.ones(2, 4), torch.ones(4), eps)
