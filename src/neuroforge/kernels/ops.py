@@ -5,12 +5,13 @@ import torch
 import torch.nn.functional as F
 
 
-def _validate(x):
+def _validate(x: torch.Tensor) -> None:
     if x.ndim < 1 or x.numel() == 0 or x.dtype not in (torch.float32, torch.float16, torch.bfloat16):
         raise ValueError("Expected a nonempty floating-point tensor (fp32/fp16/bf16)")
 
 
-def _backend(x, backend, *others, row_reduction=True):
+def _backend(x: torch.Tensor, backend: str, *others: torch.Tensor,
+             row_reduction: bool = True) -> bool:
     if backend not in ("auto", "torch", "triton"):
         raise ValueError("Unknown backend")
     if backend == "torch":
@@ -26,7 +27,10 @@ def _backend(x, backend, *others, row_reduction=True):
                 and not (torch.is_grad_enabled() and any(t.requires_grad for t in tensors)))
     if eligible:
         major, _ = torch.cuda.get_device_capability(x.device)
-        eligible = major >= 8  # conservative NVIDIA Ampere+ target for this phase
+        eligible = major >= 8  # NVIDIA Ampere+ target
+        if eligible and x.dtype == torch.bfloat16:
+            with torch.cuda.device(x.device):
+                eligible = torch.cuda.is_bf16_supported()
     if eligible:
         try:
             from . import triton_ops  # noqa: F401
@@ -38,7 +42,8 @@ def _backend(x, backend, *others, row_reduction=True):
     return False
 
 
-def rmsnorm(x, weight, eps=1e-6, *, backend="auto"):
+def rmsnorm(x: torch.Tensor, weight: torch.Tensor, eps: float = 1e-6,
+            *, backend: str = "auto") -> torch.Tensor:
     _validate(x)
     if weight.shape != (x.shape[-1],) or weight.device != x.device or weight.dtype != x.dtype:
         raise ValueError("Weight must match last dimension, dtype and device")
@@ -51,7 +56,7 @@ def rmsnorm(x, weight, eps=1e-6, *, backend="auto"):
     return (z * torch.rsqrt(z.square().mean(-1, keepdim=True) + eps) * weight.float()).to(x.dtype)
 
 
-def softmax(x, *, backend="auto"):
+def softmax(x: torch.Tensor, *, backend: str = "auto") -> torch.Tensor:
     _validate(x)
     if _backend(x, backend):
         from .triton_ops import run_softmax
@@ -59,7 +64,8 @@ def softmax(x, *, backend="auto"):
     return torch.softmax(x, dim=-1, dtype=torch.float32).to(x.dtype)
 
 
-def swiglu(gate, up, *, backend="auto"):
+def swiglu(gate: torch.Tensor, up: torch.Tensor,
+           *, backend: str = "auto") -> torch.Tensor:
     _validate(gate)
     if up.shape != gate.shape or up.dtype != gate.dtype or up.device != gate.device:
         raise ValueError("Inputs must share shape, dtype and device")
