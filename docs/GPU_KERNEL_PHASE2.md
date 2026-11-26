@@ -19,7 +19,8 @@ pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/tes
 ruff check src tests
 ```
 
-Local CPU-only run of the combined kernel test suite: 38 passed, 12 skipped.
+Initial CPU-only run of the combined kernel test suite: 38 passed, 12 skipped.
+Additional boundary tests are included; consult CI for current validation status.
 Python bytecode compilation passed; this does not compile Triton GPU kernels.
 GPU validation and Qwen integration remain pending. No speedup is claimed.
 
@@ -29,7 +30,8 @@ GPU validation and Qwen integration remain pending. No speedup is claimed.
 including compilation and autotuning), then warm CUDA-event samples separately.
 It checks every output against the PyTorch baseline, reports raw samples, median
 speedup and maximum absolute error, and records hardware/software metadata.
-FP32 GEMM benchmarking disables TF32 and restores the original precision settings.
+GEMM benchmarking disables TF32 and reduced-precision FP16/BF16 reductions in the
+PyTorch baseline, then restores the original precision settings.
 The autotuning key includes the CUDA device index as well as shape, dtype and
 compute capability; this is an in-process cache, not a persistent tuning database.
 
