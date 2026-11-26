@@ -50,7 +50,7 @@ def _gemm(A, B, C, M: tl.constexpr, N: tl.constexpr, K: tl.constexpr,
                     (m[:, None] < M) & (q[None, :] < K), other=0)
         b = tl.load(B + q[:, None]*N + n[None, :],
                     (q[:, None] < K) & (n[None, :] < N), other=0)
-        acc += tl.dot(a, b, input_precision='ieee')
+        acc = tl.dot(a, b, acc, input_precision='ieee')
     tl.store(C + m[:, None]*N + n[None, :], acc,
              (m[:, None] < M) & (n[None, :] < N))
 
@@ -82,6 +82,7 @@ def run_matmul(a, b):
     c = torch.empty((m, n), dtype=a.dtype, device=a.device)
     with torch.cuda.device(a.device):
         arch = torch.cuda.get_device_capability(a.device)
-        grid = lambda meta: (triton.cdiv(m, meta['BM']), triton.cdiv(n, meta['BN']))  # noqa: E731
+        def grid(meta):
+            return triton.cdiv(m, meta['BM']), triton.cdiv(n, meta['BN'])
         _gemm[grid](a, b, c, m, n, k, str(a.dtype), arch, a.device.index)
     return c
