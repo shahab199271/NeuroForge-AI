@@ -32,25 +32,49 @@ flowchart LR
 
 ## Experimental GPU kernels
 
-The kernel lab implements six opt-in Triton forward operators: RMSNorm, softmax,
-SwiGLU, residual RMSNorm, split-half RoPE and tiled GEMM with shape-aware autotuning.
-PyTorch reference implementations provide CPU and gradient-capable fallbacks.
-The microbenchmarks record CUDA-event latency, numerical error and raw samples;
-the advanced suite also provides analytical roofline estimates.
+The kernel lab is an opt-in research implementation, separate from the Qwen
+training and serving pipeline. PyTorch references support CPU execution;
+Triton paths target NVIDIA Ampere or newer.
 
-GPU compilation, numerical validation and performance measurements remain pending.
-The operators do not automatically replace Qwen modules. The current target is
-NVIDIA Ampere or newer on a compatible Linux/WSL2 PyTorch/Triton environment.
+| Milestone | Implemented operators | Validation status |
+| --- | --- | --- |
+| 1 | RMSNorm, softmax, SwiGLU | CPU CI passed; GPU pending |
+| 2 | Residual RMSNorm, split-half RoPE, tiled GEMM, roofline model | CPU CI passed; GPU pending |
+| 3.1 | Row-wise symmetric INT8 quantization and reconstruction | CPU CI passed; GPU pending |
+| 3.2 | Group-wise and per-channel INT8 | CPU CI passed; GPU pending |
+| 3.3 | Packed signed INT4, odd-width padding, group scales | CPU CI passed; GPU pending |
+| 3.4 | Fused packed INT4 weight-only GEMM, FP32 accumulation | CPU CI passed; GPU pending |
 
-- [Basic kernels and validation](docs/GPU_KERNEL_PHASE1.md)
-- [Advanced kernels and roofline methodology](docs/GPU_KERNEL_PHASE2.md)
+The fused kernel decodes and scales weight tiles inside GEMM rather than
+materializing a full decoded weight matrix. It uses floating-point dot
+arithmetic, not native INT4 dot arithmetic. Public input checks may synchronize
+CUDA; noncontiguous inputs may require copies. The kernel lab does not yet
+replace Qwen modules. No GPU speedup, measured VRAM saving or model-quality
+improvement is claimed.
+
+- [Basic kernels](docs/GPU_KERNEL_PHASE1.md)
+- [Advanced kernels and roofline](docs/GPU_KERNEL_PHASE2.md)
+- [Row-wise INT8](docs/GPU_KERNEL_PHASE3_INT8.md)
+- [Grouped INT8](docs/GPU_KERNEL_PHASE3_GROUPED.md)
+- [Packed INT4](docs/GPU_KERNEL_PHASE3_INT4.md)
+- [Fused INT4 GEMM](docs/GPU_KERNEL_PHASE3_INT4_GEMM.md)
+- [GPU environment and validation protocol](docs/GPU_VALIDATION.md)
+- [Capability and evidence register](docs/GPU_KERNEL_STATUS.md)
 
 ```bash
-pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/test_kernel_roofline.py
-# With a compatible CUDA/Triton installation:
+pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/test_kernel_roofline.py tests/test_int8_quantization.py tests/test_group_quantization.py tests/test_int4.py tests/test_int4_gemm.py
+# On a compatible CUDA/Triton installation:
 python -m neuroforge.kernel_benchmark --dtype float16
 python -m neuroforge.advanced_benchmark --dtype float16
 ```
+
+The existing benchmark commands cover phases 1–2. A dedicated quantized
+benchmark suite is planned for phase 3.8. For installation of the proposed
+GPU validation stack, follow the validation protocol rather than installing
+an arbitrary standalone Triton version.
+
+Next: explicit mixed-precision policies (3.5), quantization error analysis
+(3.6), quantized autotuning (3.7), and advanced benchmarking (3.8).
 
 ## Setup
 
