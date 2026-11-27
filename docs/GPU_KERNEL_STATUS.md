@@ -16,6 +16,23 @@ CI 63, 70, 77 and 84 completed successfully including Ruff and pytest.
 These are pull-request CI results, not GPU runs. The CI workflow uses
 Ubuntu and Python 3.11. GPU test skips do not count as validation.
 
+## Pre-phase 3.5 verification (2026-11-27)
+
+[CI 90](https://github.com/shahab199271/NeuroForge-AI/actions/runs/45891422700)
+validated the documentation-only PR 6 before its merge into main at
+`11bb767d67bf18efc171904c3ba16aa662695827`. The job log reports Ruff:
+`All checks passed!` and pytest: `179 passed, 85 skipped, 4 warnings in 7.60s`.
+The resolved environment included Python 3.11, PyTorch 2.15.0, Triton 3.9.0,
+pytest 9.2.0 and Ruff 0.17.6. These are versions reported by that CI log,
+not a GPU-tested compatibility matrix or pinned project requirements.
+
+An independent local regression on the archived phase 1–3.4 kernel sources
+reported `146 passed, 85 skipped, 18 warnings in 1.48s` under Python 3.13.5
+and PyTorch 2.10.0+cpu. The skips were due to CUDA/Triton requirements.
+Some archived phase 1–2 files differ from main, so this is complementary
+CPU evidence, not a byte-identical checkout of main. Python bytecode
+compilation also succeeded. No GPU validation was performed.
+
 ## Data and numerical contracts
 
 - INT8 codes are in [-127,127]; -128 is reserved.
