@@ -51,6 +51,17 @@ compilation also succeeded. No GPU validation was performed.
 - Packed INT4 is distinct from bitsandbytes NF4 QLoRA. The format is not
   automatically interoperable with other packed-weight libraries.
 
+## Phase 3.5 addition
+
+The opt-in mixed precision wrapper selects FP32, FP16 or BF16 operands
+without modifying packed INT4 weights or FP32 scales. The default policy
+preserves phase 3.4 semantics. FP32 accumulation and output remain fixed.
+Auto selection is a hardware/range heuristic, not a measured optimum.
+See [mixed precision contract](GPU_KERNEL_PHASE3_MIXED_PRECISION.md) for
+repeated CPU tests (33 dedicated passes, 179 kernel regression passes).
+Full repository CI for the new change and GPU execution remain separate
+validation steps. The snapshot above records the phase 3.4 baseline.
+
 ## Unverified and planned
 
 GPU JIT compilation, GPU numerical correctness, memory safety and runtime
@@ -59,6 +70,6 @@ as optimal. There is no demonstrated end-to-end Qwen replacement, trained
 model accuracy gain, measured GPU speedup or peak VRAM saving. Storage
 formulae and roofline estimates are analytical, not measurements.
 
-Planned: 3.5 mixed-precision policy; 3.6 error analysis; 3.7 quantized
+Planned: 3.6 error analysis; 3.7 quantized
 autotuning; 3.8 benchmarking. Model integration and full GPU validation
 remain distinct work items. See [validation protocol](GPU_VALIDATION.md).
