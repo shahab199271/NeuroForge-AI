@@ -86,6 +86,7 @@ CUDA_LAUNCH_BLOCKING=1 pytest -vv -rs \
   tests/test_gpu_kernels.py tests/test_advanced_kernels.py \
   tests/test_kernel_roofline.py tests/test_int8_quantization.py \
   tests/test_group_quantization.py tests/test_int4.py tests/test_int4_gemm.py \
+  tests/test_mixed_precision.py \
   | tee outputs/gpu-validation/kernel-pytest.txt
 ```
 
@@ -102,6 +103,8 @@ Review failures by operator, shape, dtype, device and backend. Repeat on each
 target GPU; one device does not establish support across architectures.
 Test odd dimensions, noncontiguous inputs, partial groups, zero groups, ties,
 reserved codes, saturation, and GEMM against the independent FP64 oracle.
+For mixed precision, record the requested policy and selected operand dtype;
+exercise explicit FP32/FP16/BF16 and the auto selection on supported hardware.
 Do not relax tolerances merely to make a run pass.
 
 If NVIDIA Compute Sanitizer is installed and supported by the host:
