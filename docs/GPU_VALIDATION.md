@@ -79,7 +79,7 @@ Use a clean checkout for publishable results, and keep logs free of credentials.
 ## Correctness and compilation
 
 ```bash
-set -o pipefail
+set -e -o pipefail
 ruff check src tests
 pytest -q -rs | tee outputs/gpu-validation/full-pytest.txt
 CUDA_LAUNCH_BLOCKING=1 pytest -vv -rs \
@@ -88,6 +88,11 @@ CUDA_LAUNCH_BLOCKING=1 pytest -vv -rs \
   tests/test_group_quantization.py tests/test_int4.py tests/test_int4_gemm.py \
   | tee outputs/gpu-validation/kernel-pytest.txt
 ```
+
+Run the correctness commands in a dedicated Bash shell or script: the
+fail-fast options stop on a failed command or failed pipeline, including
+pytest failures when output is piped to tee. Do not treat successful log
+creation as a successful test run.
 
 Inspect the verbose node IDs and skip reasons. Explicit Triton cases must
 actually execute on CUDA; CPU fallback is not evidence of Triton correctness.
