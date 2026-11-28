@@ -39,8 +39,13 @@ def main() -> None:
                         row = analyze_quantization(w, a, bits=bits, group_size=group,
                                                     precision=precision, backend=args.backend)
                         rows.append(dict(row, seed=seed, distribution=distribution))
-    result = {'schema_version': 1, 'torch_version': str(torch.__version__),
+    result = {'schema_version': 2, 'torch_version': str(torch.__version__),
               'cuda_version': torch.version.cuda,
+              'device': args.device, 'backend': args.backend,
+              'dimensions': {'m': args.m, 'n': args.n, 'k': args.k},
+              'groups': args.groups, 'seeds': args.seeds,
+              'gpu_name': (torch.cuda.get_device_name(torch.device(args.device))
+                           if torch.device(args.device).type == 'cuda' else None),
               'float32_matmul_precision': torch.get_float32_matmul_precision(),
               'rows': rows}
     args.output.parent.mkdir(parents=True, exist_ok=True)
