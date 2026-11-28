@@ -135,3 +135,62 @@ def test_cuda_diagnostics(bits):
     a = torch.randn(3, 17, device='cuda')
     r = analyze_quantization(w, a, bits=bits, group_size=7, backend='triton')
     assert r['execution_error']['max_abs'] < 0.01
+
+
+def test_separate_rounding_diagnostics():
+    w = torch.tensor([[7., 1., -2.]])
+    a = torch.tensor([[1.0003, 0., 0.]])
+    r = analyze_quantization(w, a, group_size=3, precision='fp16')
+    assert r['activation_rounding_error']['max_abs'] > 0
+    assert r['activation_output_error']['max_abs'] > 0
+    assert r['weight_operand_error']['max_abs'] == 0
+    assert r['weight_operand_output_error']['max_abs'] == 0
+    assert r['diagnostics']['weight_saturated'] == 0
+
+
+def test_saturation_and_underflow_counts():
+    w = torch.tensor([[70000., 1e-10, 0.]])
+    a = torch.tensor([[1., 1e-10, 0.]])
+    r = analyze_quantization(w, a, group_size=1, precision='fp16')
+    assert r['diagnostics'] == {
+        'activation_rounded_to_zero': 1,
+        'weight_rounded_to_zero': 1,
+        'weight_saturated': 1,
+        'reconstructed_weight_zeros': 1,
+    }
+
+
+def test_nonfinite_output_rejected():
+    w = torch.full((1, 2), 1e30)
+    a = torch.full((1, 2), 1e30)
+    with pytest.raises(ValueError, match='finite'):
+        analyze_quantization(w, a)
+
+
+def test_noncontiguous_inputs():
+    rng = torch.Generator().manual_seed(7)
+    a = torch.randn(4, 18, generator=rng)[:, ::2]
+    w = torch.randn(5, 18, generator=rng)[:, ::2]
+    for bits in (4, 8):
+        kwargs = dict(bits=bits, group_size=5, precision='bf16')
+        assert analyze_quantization(w, a, **kwargs) == analyze_quantization(
+            w.contiguous(), a.contiguous(), **kwargs)
+
+
+def test_cli_sweep(tmp_path, monkeypatch):
+    from neuroforge.quantization_error_sweep import main
+    import sys
+
+    out = tmp_path / 'report.json'
+    monkeypatch.setattr(sys, 'argv', [
+        'quantization_error_sweep', '--m', '2', '--n', '3', '--k', '9',
+        '--groups', '3', '8', '--seeds', '0', '29', '--output', str(out),
+    ])
+    main()
+    first = out.read_bytes()
+    report = json.loads(first)
+    assert len(report['rows']) == 48
+    assert {r['seed'] for r in report['rows']} == {0, 29}
+    assert {r['distribution'] for r in report['rows']} == {'normal', 'outlier'}
+    main()
+    assert first == out.read_bytes()
