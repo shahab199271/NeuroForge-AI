@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Last-axis operators. No automatic modification of existing models."""
 import math
 
