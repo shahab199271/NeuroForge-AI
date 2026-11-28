@@ -79,4 +79,4 @@ and CUDA cases when available. CI 115 passed the initial implementation
 (253 passed, 94 skipped, 4 warnings). The extended suite and repeated full
 sweep are checked by the updated CI workflow; [CI 126](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46134653472)
 passed with 258 tests, 94 skips and 4 warnings. Both dedicated runs passed
-46 tests (2 skips each), and the two 144-row reports were byte-identical. GPU runtime validation remains pending.
+46 tests (2 skips each), and the two 144-row reports were byte-identical. GPU runtime validation remains pending. See [engineering validation](KERNEL_ENGINEERING_VALIDATION.md) for subsequent property tests, coverage and scientific reports.
