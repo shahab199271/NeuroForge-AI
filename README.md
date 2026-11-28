@@ -1,6 +1,54 @@
+<div align="center">
+
 # NeuroForge AI
 
-Maintained by Shahab Baloochi.
+**LLM Compression · GPU Kernel Engineering · Numerical Computing**
+
+Maintained by **Shahab Baloochi**
+
+[![Python quality checks](https://github.com/shahab199271/NeuroForge-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/shahab199271/NeuroForge-AI/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-64748B?style=flat-square)](LICENSE)
+[![Development status](https://img.shields.io/badge/Phase-3.6%2B-2563EB?style=flat-square)](docs/GPU_KERNEL_STATUS.md)
+
+**Core computing & model engineering**
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Triton](https://img.shields.io/badge/Triton-475569?style=flat-square)
+![CUDA target](https://img.shields.io/badge/CUDA-target-4D7C0F?style=flat-square&logo=nvidia&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/Hugging%20Face-B45309?style=flat-square&logo=huggingface&logoColor=white)
+![PEFT](https://img.shields.io/badge/PEFT-475569?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+
+**Scientific computing & validation**
+
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white)
+![SciPy](https://img.shields.io/badge/SciPy-2563EB?style=flat-square&logo=scipy&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-475569?style=flat-square)
+![pytest](https://img.shields.io/badge/pytest-2563EB?style=flat-square&logo=pytest&logoColor=white)
+![Hypothesis](https://img.shields.io/badge/Hypothesis-475569?style=flat-square)
+![Coverage.py](https://img.shields.io/badge/Coverage.py-475569?style=flat-square)
+![Mypy](https://img.shields.io/badge/Mypy-scoped-2563EB?style=flat-square)
+![Ruff](https://img.shields.io/badge/Ruff-475569?style=flat-square&logo=ruff&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
+
+</div>
+
+### Engineering dashboard · Verified CPU snapshot
+
+| Passing tests | Generated examples | CPU-facing coverage | Numerical configurations |
+| :---: | :---: | :---: | :---: |
+| **308** | **1,800** | **86.16%** | **48** |
+| 0 failed · 100 skipped | 9 Hypothesis properties | Lines + branches | SciPy / Matplotlib |
+
+**Whole kernel coverage:** 58.50% · **Reproducibility:** two identical 144-row reports · **GPU runtime validation:** pending
+
+[Verified CI #189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756) · [Scientific reports](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030) · [Validation protocol](docs/KERNEL_ENGINEERING_VALIDATION.md)
+
+<sub>Metrics are a recorded CPU CI snapshot, not live coverage or GPU benchmark results. Technology badges describe the implementation and engineering stack; CUDA/Triton runtime and sanitizer results are not yet verified.</sub>
+
+---
 
 **Fine-tune · Compress · Optimize · Benchmark · Deploy**
 
