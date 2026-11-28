@@ -14,3 +14,11 @@ jobs:
       - run: pip install -e '.[dev]'
       - run: ruff check src tests
       - run: pytest -q
+      - name: Repeat numerical diagnostics
+        run: |
+          pytest -q -rs tests/test_error_analysis.py
+          pytest -q -rs tests/test_error_analysis.py
+          python -m neuroforge.quantization_error_sweep --output /tmp/quantization-errors-first.json
+          python -m neuroforge.quantization_error_sweep --output /tmp/quantization-errors-second.json
+          cmp /tmp/quantization-errors-first.json /tmp/quantization-errors-second.json
+          python -c "import json; r=json.load(open('/tmp/quantization-errors-first.json')); assert len(r['rows']) == 144; print('Validated 144 deterministic diagnostic rows')"
