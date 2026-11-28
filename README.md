@@ -44,7 +44,8 @@ Triton paths target NVIDIA Ampere or newer.
 | 3.2 | Group-wise and per-channel INT8 | CPU CI passed; GPU pending |
 | 3.3 | Packed signed INT4, odd-width padding, group scales | CPU CI passed; GPU pending |
 | 3.4 | Fused packed INT4 weight-only GEMM, FP32 accumulation | CPU CI passed; GPU pending |
-| 3.5 | Explicit FP32/FP16/BF16 operand policies, fixed FP32 accumulation | Local CPU tests passed; GPU pending |
+| 3.5 | Explicit FP32/FP16/BF16 operand policies, fixed FP32 accumulation | CPU CI passed; GPU pending |
+| 3.6 | FP64 error decomposition and synthetic diagnostic sweep | Initial CPU CI passed; extended validation pending |
 
 The fused kernel decodes and scales weight tiles inside GEMM rather than
 materializing a full decoded weight matrix. It uses floating-point dot
@@ -60,11 +61,12 @@ improvement is claimed.
 - [Packed INT4](docs/GPU_KERNEL_PHASE3_INT4.md)
 - [Fused INT4 GEMM](docs/GPU_KERNEL_PHASE3_INT4_GEMM.md)
 - [Mixed precision policies](docs/GPU_KERNEL_PHASE3_MIXED_PRECISION.md)
+- [Quantization error analysis](docs/GPU_KERNEL_PHASE3_ERROR_ANALYSIS.md)
 - [GPU environment and validation protocol](docs/GPU_VALIDATION.md)
 - [Capability and evidence register](docs/GPU_KERNEL_STATUS.md)
 
 ```bash
-pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/test_kernel_roofline.py tests/test_int8_quantization.py tests/test_group_quantization.py tests/test_int4.py tests/test_int4_gemm.py tests/test_mixed_precision.py
+pytest -q -rs tests/test_gpu_kernels.py tests/test_advanced_kernels.py tests/test_kernel_roofline.py tests/test_int8_quantization.py tests/test_group_quantization.py tests/test_int4.py tests/test_int4_gemm.py tests/test_mixed_precision.py tests/test_error_analysis.py
 # On a compatible CUDA/Triton installation:
 python -m neuroforge.kernel_benchmark --dtype float16
 python -m neuroforge.advanced_benchmark --dtype float16
@@ -75,8 +77,8 @@ benchmark suite is planned for phase 3.8. For installation of the proposed
 GPU validation stack, follow the validation protocol rather than installing
 an arbitrary standalone Triton version.
 
-Next: quantization error analysis (3.6), quantized autotuning (3.7),
-and advanced benchmarking (3.8).
+Run numerical diagnostics with `python -m neuroforge.quantization_error_sweep`.
+Next: quantized autotuning (3.7) and advanced benchmarking (3.8).
 
 ## Setup
 

@@ -59,8 +59,19 @@ preserves phase 3.4 semantics. FP32 accumulation and output remain fixed.
 Auto selection is a hardware/range heuristic, not a measured optimum.
 See [mixed precision contract](GPU_KERNEL_PHASE3_MIXED_PRECISION.md) for
 repeated CPU tests (33 dedicated passes, 179 kernel regression passes).
-Full repository CI for the new change and GPU execution remain separate
-validation steps. The snapshot above records the phase 3.4 baseline.
+[CI 104](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46046434817)
+reported 212 passed, 92 skipped, 4 warnings in 4.98s; Ruff passed.
+PR 8 merged at `3de985822b8239dabbccd5feffcf50d10dd93270`.
+GPU execution remains unverified. The snapshot above records the phase 3.4 baseline.
+
+## Phase 3.6 addition
+
+Offline FP64 error diagnostics separate reconstruction, operand rounding and
+execution error. The seeded CLI sweeps INT4/INT8, precision and group size.
+See [error analysis](GPU_KERNEL_PHASE3_ERROR_ANALYSIS.md). Validation of this
+initial addition passed [CI 115](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46134443233): 253 passed, 94 skipped, 4 warnings.
+The extended diagnostics and repeated sweep require their own CI result;
+no model accuracy or performance claim is made.
 
 ## Unverified and planned
 
@@ -70,6 +81,6 @@ as optimal. There is no demonstrated end-to-end Qwen replacement, trained
 model accuracy gain, measured GPU speedup or peak VRAM saving. Storage
 formulae and roofline estimates are analytical, not measurements.
 
-Planned: 3.6 error analysis; 3.7 quantized
+Planned: 3.7 quantized
 autotuning; 3.8 benchmarking. Model integration and full GPU validation
 remain distinct work items. See [validation protocol](GPU_VALIDATION.md).
