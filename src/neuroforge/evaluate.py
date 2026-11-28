@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Evaluate base or PEFT-adapted model on held-out IMDb sentiment reviews."""
 from __future__ import annotations
 
