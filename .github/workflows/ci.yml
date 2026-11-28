@@ -12,6 +12,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -e '.[dev]'
+      - run: python -m pip check
       - run: ruff check src tests
       - name: Static type checking (coverage utility)
         run: mypy --strict --follow-imports=silent src/neuroforge/kernel_coverage.py
@@ -26,6 +27,11 @@ jobs:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
         run: pytest -q --hypothesis-show-statistics tests/test_kernel_properties.py
+      - name: Repeat contract and stress checks
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        run: pytest -q tests/test_kernel_hardening.py tests/test_kernel_coverage.py tests/test_quantization_report.py
       - name: Repeat numerical diagnostics
         run: |
           pytest -q -rs tests/test_error_analysis.py
