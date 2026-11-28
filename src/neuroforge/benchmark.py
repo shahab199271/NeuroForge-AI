@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Reproducible single-request inference benchmark (not a server-load test).
 
 Measures warm steady-state full pipeline latency, with optional cold startup

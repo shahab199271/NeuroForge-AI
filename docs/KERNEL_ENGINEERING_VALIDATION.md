@@ -68,7 +68,16 @@ reported 258 passed, 94 skipped and 4 warnings before this addition.
 [CI 172](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46136043998)
 verified 267 passed, 94 skipped, 4 warnings, all nine property tests and
 both reproducibility sweeps. PR 11 merged at `7deb8489098443b6cc52352062d8a5d1160dc04b`.
-The extended validation workflow must pass before its own merge.
+[CI 189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756)
+verified 308 passed, 100 skipped, 4 warnings; all 1,800 dedicated Hypothesis
+examples passed, 41 contract/stress/report tests passed on repeat, and two
+144-row sweeps were identical. CPU-facing kernel coverage was 86.16%; the
+whole kernel package was 58.50% (combined lines and branches). Ruff,
+scoped strict Mypy and pip check passed. SciPy and Matplotlib produced
+48 matched configuration summaries and the error/storage plot. See the
+[validation artifacts](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030).
+PR 12 merged at `5172cafc80d64d7fd908124235844f87a16a924d`.
+Actual GPU acceptance and Compute Sanitizer execution remain pending.
 
 ## Additional hardening
 

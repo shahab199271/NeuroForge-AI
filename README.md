@@ -1,12 +1,88 @@
+<div align="center">
+
 # NeuroForge AI
 
-Maintained by Shahab Baloochi.
+**LLM Compression · GPU Kernel Engineering · Numerical Computing**
+
+Maintained by **Shahab Baloochi**
+
+[![Python quality checks](https://github.com/shahab199271/NeuroForge-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/shahab199271/NeuroForge-AI/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-64748B?style=flat-square)](LICENSE)
+[![Development status](https://img.shields.io/badge/Phase-3.6%2B-2563EB?style=flat-square)](docs/GPU_KERNEL_STATUS.md)
+
+**Core computing & model engineering**
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Triton](https://img.shields.io/badge/Triton-475569?style=flat-square)
+![CUDA target](https://img.shields.io/badge/CUDA-target-4D7C0F?style=flat-square&logo=nvidia&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/Hugging%20Face-B45309?style=flat-square&logo=huggingface&logoColor=white)
+![PEFT](https://img.shields.io/badge/PEFT-475569?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+
+**Scientific computing & validation**
+
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white)
+![SciPy](https://img.shields.io/badge/SciPy-2563EB?style=flat-square&logo=scipy&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-475569?style=flat-square)
+![pytest](https://img.shields.io/badge/pytest-2563EB?style=flat-square&logo=pytest&logoColor=white)
+![Hypothesis](https://img.shields.io/badge/Hypothesis-475569?style=flat-square)
+![Coverage.py](https://img.shields.io/badge/Coverage.py-475569?style=flat-square)
+![Mypy](https://img.shields.io/badge/Mypy-scoped-2563EB?style=flat-square)
+![Ruff](https://img.shields.io/badge/Ruff-475569?style=flat-square&logo=ruff&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
+
+</div>
+
+### Engineering dashboard · Verified CPU snapshot
+
+| Passing tests | Generated examples | CPU-facing coverage | Numerical configurations |
+| :---: | :---: | :---: | :---: |
+| **308** | **1,800** | **86.16%** | **48** |
+| 0 failed · 100 skipped | 9 Hypothesis properties | Lines + branches | SciPy / Matplotlib |
+
+**Whole kernel coverage:** 58.50% · **Reproducibility:** two identical 144-row reports · **GPU runtime validation:** pending
+
+[Verified CI #189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756) · [Scientific reports](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030) · [Validation protocol](docs/KERNEL_ENGINEERING_VALIDATION.md)
+
+<sub>Metrics are a recorded CPU CI snapshot, not live coverage or GPU benchmark results. Technology badges describe the implementation and engineering stack; CUDA/Triton runtime and sanitizer results are not yet verified.</sub>
+
+---
 
 **Fine-tune · Compress · Optimize · Benchmark · Deploy**
 
-A reproducible, open-source LLM engineering starter focused on **parameter-efficient language-model adaptation**, sentiment classification, efficient inference and measurable trade-offs.
+An open-source engineering project for **LLM compression, GPU kernel development and numerical validation**, with parameter-efficient fine-tuning, knowledge distillation, evaluation and local serving.
 
 > **Project status — implementation, not benchmark claims.** LoRA/QLoRA training code and evaluation tooling are provided. A complete GPU training run, quantitative quality metrics, memory savings, and acceleration have **not yet been verified**. Do not report improvements without reproducing the experiments.
+
+## Project at a glance
+
+- **GPU kernel lab:** Triton RMSNorm, softmax, SwiGLU, RoPE, tiled GEMM and packed INT4 weight-only GEMM.
+- **Model compression:** row-wise, grouped and per-channel INT8; packed INT4; explicit FP32/FP16/BF16 operand policies.
+- **Numerical engineering:** independent NumPy FP64 references, property-based and metamorphic tests, stress workloads, error attribution and storage/error trade-offs.
+- **LLM pipeline:** LoRA/QLoRA, teacher–student distillation, evaluation, benchmarking and FastAPI serving.
+
+### Verified CPU validation
+
+[CI #189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756) ·
+[merged PR #12](https://github.com/shahab199271/NeuroForge-AI/pull/12) ·
+[validation reports](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030)
+
+| Evidence | Result |
+| --- | ---: |
+| Full pytest suite | 308 passed, 100 skipped, 0 failed |
+| Hypothesis generated examples | 1,800 passed in the dedicated run |
+| Repeated contract and stress tests | 41 passed |
+| CPU-facing kernel coverage (lines + branches) | 86.16% |
+| Whole kernel coverage (including GPU-only code) | 58.50% |
+| Reproducibility | Two identical 144-row reports |
+| SciPy/Matplotlib reporting | 48 matched configurations |
+| Ruff, scoped strict Mypy, pip check | Passed |
+
+The CI run used CPU execution; skipped tests include GPU paths. Coverage
+does not establish GPU correctness or performance. The kernel lab is not
+yet integrated into Qwen. No measured GPU speedup is claimed.
 
 ## System design
 
@@ -44,10 +120,7 @@ flowchart LR
 | Serving and packaging | FastAPI, Pydantic, Uvicorn, setuptools, Docker |
 | GPU target (runtime unverified) | NVIDIA CUDA, Triton JIT; Compute Sanitizer protocol |
 
-See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for scope,
-commands, evidence and limitations. CI 172 verified the initial property tests and coverage workflow. Extended
-stress tests, coverage gates, scientific reports and opt-in GPU acceptance
-are subject to their own CI and hardware validation.
+**Executed in CI:** pytest, Hypothesis, NumPy, PyTorch CPU, pytest-cov / coverage.py, SciPy, Matplotlib, Ruff, scoped strict Mypy and pip check. GitHub Actions generated the linked reports. **GPU tools are not yet runtime-validated:** CUDA/Triton and NVIDIA Compute Sanitizer; Nsight profiling is planned. See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for reproducible commands and scope.
 
 ## Experimental GPU kernels
 
@@ -165,4 +238,4 @@ For a valid prediction, the API returns e.g. `{"sentiment":"positive","raw_outpu
 
 ## Responsible publication
 
-This is a newly authored implementation motivated by a prior DistilBERT / LLaMA API sentiment prototype. **The original notebook, its third-party pretrained artifacts, and its API credentials are not published here.** Do not commit API keys, model checkpoints, IMDb dataset copies, or private files. Models and datasets retain their respective upstream licences. The MIT licence applies only to the original code in this repository.
+This implementation is motivated by a prior DistilBERT / LLaMA API sentiment prototype. **The original notebook, its third-party pretrained artifacts, and its API credentials are not published here.** Do not commit API keys, model checkpoints, IMDb dataset copies, or private files. Models and datasets retain their respective upstream licences. The MIT licence applies only to the original code in this repository.

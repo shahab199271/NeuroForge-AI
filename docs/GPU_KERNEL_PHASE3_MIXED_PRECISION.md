@@ -66,13 +66,8 @@ auto selection, exact positive and negative activation range boundaries,
 invalid precision types, gradients and autocast. CUDA tests require a
 compatible NVIDIA device and Triton.
 
-Local CPU validation (Python 3.13.5, PyTorch 2.10.0+cpu): three dedicated
-runs each returned 33 passed, 7 skipped; two archive-based kernel regression
-runs each returned 179 passed, 92 skipped, 18 warnings. Python bytecode
-compilation succeeded. The direct phase 3.5 source and test blobs were
-matched against the locally tested files after push. The local ops.py was
-aligned with main; some older phase 2 archive files differ from main.
-This is not a full checkout test. Full repository CI is required separately.
+The archived local execution record is not independently verifiable.
+The linked GitHub Actions log is the recorded CPU evidence.
 [CI 104](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46046434817)
 passed the full suite (212 passed, 92 skipped, 4 warnings).
 No GPU compilation, runtime or performance measurements are verified.

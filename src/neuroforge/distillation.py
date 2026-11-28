@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Teacher–student logit distillation for shared-tokenizer causal language models.
 
 Teacher and student MUST have identical token IDs/vocabulary mapping. For Qwen2.5
