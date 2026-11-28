@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Reproducible synthetic quantization error sweep (not a speed benchmark)."""
 from __future__ import annotations
 
