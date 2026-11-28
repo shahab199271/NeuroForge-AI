@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Distillation tests run entirely offline with tiny random models; no GPU required."""
 from types import SimpleNamespace
 
