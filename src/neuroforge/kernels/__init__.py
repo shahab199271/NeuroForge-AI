@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Inference-only GPU operators with an explicit PyTorch fallback."""
 from .ops import rmsnorm, softmax, swiglu
 
