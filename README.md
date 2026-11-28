@@ -4,9 +4,37 @@ Maintained by Shahab Baloochi.
 
 **Fine-tune · Compress · Optimize · Benchmark · Deploy**
 
-A reproducible, open-source LLM engineering starter focused on **parameter-efficient language-model adaptation**, sentiment classification, efficient inference and measurable trade-offs.
+An open-source engineering project for **LLM compression, GPU kernel development and numerical validation**, with parameter-efficient fine-tuning, knowledge distillation, evaluation and local serving.
 
 > **Project status — implementation, not benchmark claims.** LoRA/QLoRA training code and evaluation tooling are provided. A complete GPU training run, quantitative quality metrics, memory savings, and acceleration have **not yet been verified**. Do not report improvements without reproducing the experiments.
+
+## Project at a glance
+
+- **GPU kernel lab:** Triton RMSNorm, softmax, SwiGLU, RoPE, tiled GEMM and packed INT4 weight-only GEMM.
+- **Model compression:** row-wise, grouped and per-channel INT8; packed INT4; explicit FP32/FP16/BF16 operand policies.
+- **Numerical engineering:** independent NumPy FP64 references, property-based and metamorphic tests, stress workloads, error attribution and storage/error trade-offs.
+- **LLM pipeline:** LoRA/QLoRA, teacher–student distillation, evaluation, benchmarking and FastAPI serving.
+
+### Verified CPU validation
+
+[CI #189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756) ·
+[merged PR #12](https://github.com/shahab199271/NeuroForge-AI/pull/12) ·
+[validation reports](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030)
+
+| Evidence | Result |
+| --- | ---: |
+| Full pytest suite | 308 passed, 100 skipped, 0 failed |
+| Hypothesis generated examples | 1,800 passed in the dedicated run |
+| Repeated contract and stress tests | 41 passed |
+| CPU-facing kernel coverage (lines + branches) | 86.16% |
+| Whole kernel coverage (including GPU-only code) | 58.50% |
+| Reproducibility | Two identical 144-row reports |
+| SciPy/Matplotlib reporting | 48 matched configurations |
+| Ruff, scoped strict Mypy, pip check | Passed |
+
+The CI run used CPU execution; skipped tests include GPU paths. Coverage
+does not establish GPU correctness or performance. The kernel lab is not
+yet integrated into Qwen. No measured GPU speedup is claimed.
 
 ## System design
 
@@ -44,10 +72,7 @@ flowchart LR
 | Serving and packaging | FastAPI, Pydantic, Uvicorn, setuptools, Docker |
 | GPU target (runtime unverified) | NVIDIA CUDA, Triton JIT; Compute Sanitizer protocol |
 
-See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for scope,
-commands, evidence and limitations. CI 172 verified the initial property tests and coverage workflow. Extended
-stress tests, coverage gates, scientific reports and opt-in GPU acceptance
-are subject to their own CI and hardware validation.
+**Executed in CI:** pytest, Hypothesis, NumPy, PyTorch CPU, pytest-cov / coverage.py, SciPy, Matplotlib, Ruff, scoped strict Mypy and pip check. GitHub Actions generated the linked reports. **GPU tools are not yet runtime-validated:** CUDA/Triton and NVIDIA Compute Sanitizer; Nsight profiling is planned. See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for reproducible commands and scope.
 
 ## Experimental GPU kernels
 
@@ -165,4 +190,4 @@ For a valid prediction, the API returns e.g. `{"sentiment":"positive","raw_outpu
 
 ## Responsible publication
 
-This is a newly authored implementation motivated by a prior DistilBERT / LLaMA API sentiment prototype. **The original notebook, its third-party pretrained artifacts, and its API credentials are not published here.** Do not commit API keys, model checkpoints, IMDb dataset copies, or private files. Models and datasets retain their respective upstream licences. The MIT licence applies only to the original code in this repository.
+This implementation is motivated by a prior DistilBERT / LLaMA API sentiment prototype. **The original notebook, its third-party pretrained artifacts, and its API credentials are not published here.** Do not commit API keys, model checkpoints, IMDb dataset copies, or private files. Models and datasets retain their respective upstream licences. The MIT licence applies only to the original code in this repository.
