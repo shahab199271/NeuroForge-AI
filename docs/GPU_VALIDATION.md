@@ -120,6 +120,26 @@ compute-sanitizer --tool memcheck --error-exitcode 1 \
 Treat sanitizer availability as a separate check; WSL support depends on
 driver and tooling. Do not benchmark under CUDA_LAUNCH_BLOCKING or sanitizer.
 
+## Strict GPU acceptance (opt-in)
+
+The dedicated acceptance suite intentionally fails if requested CUDA, Triton,
+Ampere+ or BF16 support is absent. Ordinary CPU CI skips it explicitly.
+
+```bash
+NEUROFORGE_REQUIRE_GPU=1 python -m pytest -q -rs tests/test_gpu_acceptance.py
+NEUROFORGE_REQUIRE_GPU=1 compute-sanitizer --tool memcheck --error-exitcode 1 \
+  python -m pytest -q -rs tests/test_gpu_acceptance.py
+NEUROFORGE_REQUIRE_GPU=1 compute-sanitizer --tool racecheck --error-exitcode 1 \
+  python -m pytest -q -rs tests/test_gpu_acceptance.py
+NEUROFORGE_REQUIRE_GPU=1 compute-sanitizer --tool synccheck --error-exitcode 1 \
+  python -m pytest -q -rs tests/test_gpu_acceptance.py
+```
+
+Run these only on a trusted GPU environment with supported sanitizer tooling.
+This acceptance subset supplements rather than replaces the full GPU suite.
+A clean sanitizer run is scoped to executed cases and the selected tool.
+These commands have not been executed on repository hardware yet.
+
 ## Performance protocol
 
 Existing phase 1–2 microbenchmarks:
