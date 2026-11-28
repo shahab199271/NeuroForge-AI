@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Forward-only row quantization and tiled FP32 reconstruction."""
 import torch
 import triton
