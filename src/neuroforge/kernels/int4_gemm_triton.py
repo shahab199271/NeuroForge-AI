@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Tiled fused INT4 decode, scale and GEMM; no full decoded weight buffer."""
 import torch
 import triton
