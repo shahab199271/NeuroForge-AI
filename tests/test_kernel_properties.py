@@ -48,8 +48,28 @@ def _group_oracle(x, group, qmax):
     return q, scales
 
 
+def _check_quantized(x, group, qmax, q, scales):
+    """Check scales and nearest-code residual, allowing documented FP32 rounding.
+
+    Near a half-integer, one ULP of scale/division can select either adjacent
+    integer. Exact tie behavior is covered by the dedicated quantization tests.
+    """
+    _, ideal_scales = _group_oracle(x, group, qmax)
+    np.testing.assert_array_max_ulp(scales, ideal_scales, maxulp=1)
+    expanded = scales[:, np.arange(x.shape[1]) // group].astype(np.float64)
+    ratio = x.astype(np.float64) / expanded
+    assert np.all(np.abs(q.astype(np.float64)) <= qmax)
+    assert np.all(np.abs(ratio - q) <= 0.5 + 2e-5)
+
+
 def _reconstruct(q, scales, group):
     return q.astype(np.float32) * scales[:, np.arange(q.shape[1]) // group]
+
+
+def _decode_numpy(packed, width):
+    nibbles = np.stack((packed & 15, packed >> 4), axis=-1).reshape(packed.shape[0], -1)
+    codes = nibbles[:, :width].astype(np.int16)
+    return np.where(codes >= 8, codes - 16, codes).astype(np.int8)
 
 
 def _close(actual, expected, rtol=2e-5, atol=2e-5):
@@ -96,10 +116,8 @@ def test_phase2_operators(x, seed):
 def test_phase31_rowwise_int8(x):
     t = torch.from_numpy(x)
     q, s = quantize_int8(t, backend='torch')
-    expected, scales = _group_oracle(x, x.shape[-1], 127)
-    np.testing.assert_array_equal(q.numpy(), expected)
-    np.testing.assert_array_equal(s.numpy(), scales)
-    _close(dequantize_int8(q, s, backend='torch'), _reconstruct(expected, scales, x.shape[-1]),
+    _check_quantized(x, x.shape[-1], 127, q.numpy(), s.numpy())
+    _close(dequantize_int8(q, s, backend='torch'), _reconstruct(q.numpy(), s.numpy(), x.shape[-1]),
            rtol=0, atol=0)
 
 
@@ -108,17 +126,13 @@ def test_phase31_rowwise_int8(x):
 def test_phase32_group_and_channel_int8(x, group):
     t = torch.from_numpy(x)
     q, s = quantize_grouped(t, group, backend='torch')
-    expected, scales = _group_oracle(x, group, 127)
-    np.testing.assert_array_equal(q.numpy(), expected)
-    np.testing.assert_array_equal(s.numpy(), scales)
-    _close(dequantize_grouped(q, s, group, backend='torch'), _reconstruct(expected, scales, group),
+    _check_quantized(x, group, 127, q.numpy(), s.numpy())
+    _close(dequantize_grouped(q, s, group, backend='torch'), _reconstruct(q.numpy(), s.numpy(), group),
            rtol=0, atol=0)
     cq, cs = quantize_channels(t, axis=1, backend='torch')
-    ec, es = _group_oracle(x.T, x.shape[0], 127)
-    np.testing.assert_array_equal(cq.numpy(), ec.T)
-    np.testing.assert_array_equal(cs.numpy(), es[:, 0])
+    _check_quantized(x.T, x.shape[0], 127, cq.numpy().T, cs.numpy()[:, None])
     _close(dequantize_channels(cq, cs, axis=1, backend='torch'),
-           _reconstruct(ec, es, x.shape[0]).T, rtol=0, atol=0)
+           _reconstruct(cq.numpy().T, cs.numpy()[:, None], x.shape[0]).T, rtol=0, atol=0)
 
 
 @property_settings
@@ -136,9 +150,8 @@ def test_phase33_packed_layout(codes):
 @given(x=matrices(), group=st.integers(1, 64))
 def test_phase33_grouped_int4_error_bound(x, group):
     packed, scales = quantize_int4(torch.from_numpy(x), group, backend='torch')
-    q, s = _group_oracle(x, group, 7)
-    np.testing.assert_array_equal(unpack_int4(packed, x.shape[1], backend='torch').numpy(), q)
-    np.testing.assert_array_equal(scales.numpy(), s)
+    q, s = _decode_numpy(packed.numpy(), x.shape[1]), scales.numpy()
+    _check_quantized(x, group, 7, q, s)
     error = np.abs(x.astype(np.float64) - _reconstruct(q, s, group).astype(np.float64))
     # Half a quantization step plus bounded FP32 roundoff.
     assert np.all(error <= s[:, np.arange(x.shape[1]) // group] / 2 + 5e-6)
@@ -150,7 +163,8 @@ def test_phase33_grouped_int4_error_bound(x, group):
 def test_phase34_35_gemm_numpy(w, group, precision, seed):
     a = np.random.default_rng(seed).normal(size=(3, w.shape[1])).astype(np.float32)
     packed, scales = quantize_int4(torch.from_numpy(w), group, backend='torch')
-    q, s = _group_oracle(w, group, 7)
+    q, s = _decode_numpy(packed.numpy(), w.shape[1]), scales.numpy()
+    _check_quantized(w, group, 7, q, s)
     wq = _reconstruct(q, s, group)
     if precision == 'fp16':
         ar, wr = a.astype(np.float16).astype(np.float64), wq.astype(np.float16).astype(np.float64)
@@ -195,7 +209,14 @@ def test_phase36_metrics_numpy(x, shift):
 @given(w=matrices(max_width=19), group=st.integers(1, 32), bits=st.sampled_from([4, 8]))
 def test_phase36_output_error_numpy(w, group, bits):
     a = np.arange(1, w.shape[1]+1, dtype=np.float32)[None, :] / np.float32(8)
-    q, s = _group_oracle(w, group, 7 if bits == 4 else 127)
+    if bits == 4:
+        packed, scales = quantize_int4(torch.from_numpy(w), group, backend='torch')
+        q = _decode_numpy(packed.numpy(), w.shape[1])
+    else:
+        codes, scales = quantize_grouped(torch.from_numpy(w), group, backend='torch')
+        q = codes.numpy()
+    s = scales.numpy()
+    _check_quantized(w, group, 7 if bits == 4 else 127, q, s)
     wq = _reconstruct(q, s, group)
     y0 = a.astype(np.float64) @ w.astype(np.float64).T
     yq = a.astype(np.float64) @ wq.astype(np.float64).T
