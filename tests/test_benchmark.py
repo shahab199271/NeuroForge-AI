@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 import pytest
 
 from neuroforge.benchmark import latency_summary
