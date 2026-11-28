@@ -26,12 +26,9 @@ The resolved environment included Python 3.11, PyTorch 2.15.0, Triton 3.9.0,
 pytest 9.2.0 and Ruff 0.17.6. These are versions reported by that CI log,
 not a GPU-tested compatibility matrix or pinned project requirements.
 
-An independent local regression on the archived phase 1–3.4 kernel sources
-reported `146 passed, 85 skipped, 18 warnings in 1.48s` under Python 3.13.5
-and PyTorch 2.10.0+cpu. The skips were due to CUDA/Triton requirements.
-Some archived phase 1–2 files differ from main, so this is complementary
-CPU evidence, not a byte-identical checkout of main. Python bytecode
-compilation also succeeded. No GPU validation was performed.
+No independently verifiable archived local execution record is available.
+The linked GitHub Actions log is the recorded CPU evidence. No GPU validation
+was performed.
 
 ## Data and numerical contracts
 
@@ -86,7 +83,16 @@ sweep; combined kernel coverage was 56%, including GPU-only files at 0%.
 PR 11 merged at `7deb8489098443b6cc52352062d8a5d1160dc04b`.
 The next hardening revision adds scoped coverage gates, stress/metamorphic
 checks, scoped Mypy, scientific reports and strict GPU acceptance.
-Its own CI evidence and real GPU execution remain pending.
+[CI 189](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756)
+verified 308 passed, 100 skipped, 4 warnings; all 1,800 dedicated Hypothesis
+examples passed, 41 contract/stress/report tests passed on repeat, and two
+144-row sweeps were identical. CPU-facing kernel coverage was 86.16%; the
+whole kernel package was 58.50% (combined lines and branches). Ruff,
+scoped strict Mypy and pip check passed. SciPy and Matplotlib produced
+48 matched configuration summaries and the error/storage plot. See the
+[validation artifacts](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46139659756/artifacts/15261422030).
+PR 12 merged at `5172cafc80d64d7fd908124235844f87a16a924d`.
+Actual GPU acceptance and Compute Sanitizer execution remain pending.
 
 ## Unverified and planned
 
