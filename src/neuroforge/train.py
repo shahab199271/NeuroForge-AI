@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Fine-tune an instruction-following sentiment LLM with LoRA or 4-bit QLoRA."""
 from __future__ import annotations
 
