@@ -79,8 +79,8 @@ def analyze_quantization(weights: torch.Tensor, activations: torch.Tensor, *,
                          precision: str = 'fp32', backend: str = 'torch') -> dict:
     """Decompose weight, output quantization, operand and execution errors.
 
-    Reference stages: A W.T, A Wq.T, Ar Wr.T, actual output. All three
-    reference products use FP64 on CPU. Wq is the actual FP32 reconstruction;
+    Reference stages: A W.T, A Wq.T, Ar Wq.T, Ar Wr.T, actual output.
+    All four reference products use FP64 on CPU. Wq is the actual FP32 reconstruction;
     Ar and Wr reproduce operand rounding and weight saturation. Stage
     differences are not additive as scalar norms; signed residuals are.
     INT8 analysis is a reconstruction-based reference, not fused INT8 GEMM.
@@ -117,7 +117,9 @@ def analyze_quantization(weights: torch.Tensor, activations: torch.Tensor, *,
     a64, w64, q64 = map(_cpu64, (activations, weights, wq))
     y0 = a64 @ w64.T
     yq = a64 @ q64.T
-    yr = _cpu64(ar) @ _cpu64(wr).T
+    ar64, wr64 = _cpu64(ar), _cpu64(wr)
+    ya = ar64 @ q64.T
+    yr = ar64 @ wr64.T
     if bits == 4:
         actual = mixed_int4_matmul(activations, codes, scales, group_size,
                                    precision=precision, backend=backend)
@@ -138,7 +140,17 @@ def analyze_quantization(weights: torch.Tensor, activations: torch.Tensor, *,
         },
         'weight_error': asdict(error_metrics(w64, q64)),
         'quantization_output_error': asdict(error_metrics(y0, yq)),
+        'activation_rounding_error': asdict(error_metrics(a64, ar64)),
+        'weight_operand_error': asdict(error_metrics(q64, wr64)),
+        'activation_output_error': asdict(error_metrics(yq, ya)),
+        'weight_operand_output_error': asdict(error_metrics(ya, yr)),
         'operand_output_error': asdict(error_metrics(yq, yr)),
+        'diagnostics': {
+            'activation_rounded_to_zero': int(((a64 != 0) & (ar64 == 0)).sum()),
+            'weight_rounded_to_zero': int(((q64 != 0) & (wr64 == 0)).sum()),
+            'weight_saturated': int((q64.abs() > limit).sum()),
+            'reconstructed_weight_zeros': int((q64 == 0).sum()),
+        },
         'execution_error': asdict(error_metrics(yr, actual)),
         'total_output_error': asdict(error_metrics(y0, actual)),
     }
