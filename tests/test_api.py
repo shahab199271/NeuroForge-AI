@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 from fastapi.testclient import TestClient
 
 from neuroforge import api
