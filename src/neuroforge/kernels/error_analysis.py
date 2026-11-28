@@ -64,9 +64,18 @@ def error_metrics(reference: torch.Tensor, estimate: torch.Tensor) -> ErrorMetri
     en = float(torch.linalg.vector_norm(er))
     relative = None
     if rp:
-        relative = 0.0 if peak == 0 else (peak / rp) * (en / rn)
-        if not math.isfinite(relative):
-            raise ValueError('Relative error exceeds FP64 range')
+        if peak == 0:
+            relative = 0.0
+        else:
+            # Keep intermediate ratios in the mantissa range: a large or tiny
+            # peak/rp can overflow or underflow before the norm ratio is applied.
+            em, ee = math.frexp(peak)
+            rm, re = math.frexp(rp)
+            nm, ne = math.frexp(en / rn)
+            try:
+                relative = math.ldexp((em / rm) * nm, ee - re + ne)
+            except OverflowError as exc:
+                raise ValueError('Relative error exceeds FP64 range') from exc
     cosine = None
     if rp and yp:
         cosine = max(-1.0, min(1.0, float(torch.dot(r / rp / rn, y / yp / yn))))
