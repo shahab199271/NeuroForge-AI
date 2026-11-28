@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """One reduction program per row/group; tiled reconstruction."""
 import torch
 import triton
