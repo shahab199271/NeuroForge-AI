@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Offline numerical diagnostics for grouped quantization and mixed precision.
 
 All reference products and metric reductions run on CPU in FP64. Actual
