@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Local FastAPI inference interface with lazy model loading."""
 import os
 from functools import lru_cache
