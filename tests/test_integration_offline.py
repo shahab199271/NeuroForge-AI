@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Actual local integration: tiny random GPT-2, PEFT LoRA save/reload; no downloads."""
 import torch
 from peft import LoraConfig, PeftModel, get_peft_model
