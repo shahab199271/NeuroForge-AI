@@ -45,7 +45,7 @@ Triton paths target NVIDIA Ampere or newer.
 | 3.3 | Packed signed INT4, odd-width padding, group scales | CPU CI passed; GPU pending |
 | 3.4 | Fused packed INT4 weight-only GEMM, FP32 accumulation | CPU CI passed; GPU pending |
 | 3.5 | Explicit FP32/FP16/BF16 operand policies, fixed FP32 accumulation | CPU CI passed; GPU pending |
-| 3.6 | FP64 error decomposition and synthetic diagnostic sweep | Implementation; validation pending |
+| 3.6 | FP64 error decomposition and synthetic diagnostic sweep | Initial CPU CI passed; extended validation pending |
 
 The fused kernel decodes and scales weight tiles inside GEMM rather than
 materializing a full decoded weight matrix. It uses floating-point dot
