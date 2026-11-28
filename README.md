@@ -32,6 +32,22 @@ flowchart LR
 - **Serving:** local FastAPI endpoint with lazy model loading and typed requests.
 - **Engineering:** Python package, tests, linting, GitHub Actions and Docker support.
 
+## Technology stack and engineering tools
+
+| Area | Tools and languages |
+| --- | --- |
+| Implementation | Python, Triton language, PyTorch |
+| LLM adaptation | Hugging Face Transformers, PEFT, Accelerate, optional bitsandbytes |
+| Numerical validation | NumPy FP64 references, PyTorch FP64 diagnostics |
+| Automated testing | pytest, Hypothesis property tests, pytest-cov / coverage.py |
+| Quality and automation | Ruff, GitHub Actions, YAML, Bash |
+| Serving and packaging | FastAPI, Pydantic, Uvicorn, setuptools, Docker |
+| GPU target (runtime unverified) | NVIDIA CUDA, Triton JIT; Compute Sanitizer protocol |
+
+See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for scope,
+commands, evidence and limitations. The advanced CPU checks are implemented
+in the validation branch; their CI result must be checked before merging.
+
 ## Experimental GPU kernels
 
 The kernel lab is an opt-in research implementation, separate from the Qwen

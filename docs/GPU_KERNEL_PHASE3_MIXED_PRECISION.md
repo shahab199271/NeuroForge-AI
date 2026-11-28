@@ -74,5 +74,5 @@ matched against the locally tested files after push. The local ops.py was
 aligned with main; some older phase 2 archive files differ from main.
 This is not a full checkout test. Full repository CI is required separately.
 [CI 104](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46046434817)
-subsequently passed the full suite (212 passed, 92 skipped, 4 warnings).
+passed the full suite (212 passed, 92 skipped, 4 warnings).
 No GPU compilation, runtime or performance measurements are verified.

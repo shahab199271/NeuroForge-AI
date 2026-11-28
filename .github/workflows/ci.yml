@@ -13,7 +13,15 @@ jobs:
           python-version: '3.11'
       - run: pip install -e '.[dev]'
       - run: ruff check src tests
-      - run: pytest -q
+      - name: Full regression and kernel branch coverage
+        run: |
+          mkdir -p outputs/validation
+          pytest -q --cov=neuroforge.kernels --cov-branch --cov-report=term-missing --cov-report=json:outputs/validation/kernel-coverage.json --junitxml=outputs/validation/pytest.xml
+      - name: Independent numerical properties
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        run: pytest -q --hypothesis-show-statistics tests/test_kernel_properties.py
       - name: Repeat numerical diagnostics
         run: |
           pytest -q -rs tests/test_error_analysis.py
@@ -22,3 +30,10 @@ jobs:
           python -m neuroforge.quantization_error_sweep --output /tmp/quantization-errors-second.json
           cmp /tmp/quantization-errors-first.json /tmp/quantization-errors-second.json
           python -c "import json; r=json.load(open('/tmp/quantization-errors-first.json')); assert len(r['rows']) == 144; print('Validated 144 deterministic diagnostic rows')"
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-validation-reports
+          path: outputs/validation/
+          if-no-files-found: warn
