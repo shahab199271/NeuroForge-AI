@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Experimental forward-only fused operators and tiled matrix multiplication."""
 import math
 
