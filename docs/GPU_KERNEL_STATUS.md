@@ -69,7 +69,9 @@ GPU execution remains unverified. The snapshot above records the phase 3.4 basel
 Offline FP64 error diagnostics separate reconstruction, operand rounding and
 execution error. The seeded CLI sweeps INT4/INT8, precision and group size.
 See [error analysis](GPU_KERNEL_PHASE3_ERROR_ANALYSIS.md). Validation of this
-addition is pending; no model accuracy or performance claim is made.
+initial addition passed [CI 115](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46134443233): 253 passed, 94 skipped, 4 warnings.
+The extended diagnostics and repeated sweep require their own CI result;
+no model accuracy or performance claim is made.
 
 ## Unverified and planned
 
