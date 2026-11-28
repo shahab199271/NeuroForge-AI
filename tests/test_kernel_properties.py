@@ -20,7 +20,7 @@ from neuroforge.kernels.error_analysis import error_metrics, analyze_quantizatio
 
 # Each property has a bounded, repeatable example budget. Deadlines are
 # disabled because CI scheduling and tensor library startup can vary.
-property_settings = settings(max_examples=60, derandomize=True, deadline=None)
+property_settings = settings(max_examples=200, derandomize=True, deadline=None)
 
 
 @st.composite

@@ -9,7 +9,7 @@ kernel algorithms.
 
 ## Property tests and independent references
 
-The bounded CPU suite uses nine properties, each with a maximum of 60
+The bounded CPU suite uses nine properties, each with a maximum of 200
 generated examples and deterministic generation for a fixed Hypothesis
 version. Hypothesis can shrink failures. Tensor sizes and values are
 bounded to keep the CI workload manageable. The examples are not a proof
@@ -53,9 +53,11 @@ the coverage JSON and JUnit XML as a workflow artifact.
 Coverage is scoped to the kernel Python package, including Triton source
 modules. CPU jobs cannot execute GPU-only paths. A percentage is not
 evidence of GPU execution, device memory safety, or numerical correctness.
-No percentage threshold is imposed before an observed baseline and
-review of missed branches. Future changes can enforce a justified
-CPU-specific threshold without hiding GPU-only paths.
+CI 172 measured 56% combined line and branch coverage of the whole kernel
+package. The new gates require at least 55% whole-package coverage and 80%
+combined coverage of the nine CPU-facing modules (including their unexecuted
+GPU dispatch branches). These are initial conservative regression floors,
+not target completion percentages. Both scopes remain visible.
 
 ## Evidence and remaining work
 
@@ -63,7 +65,31 @@ The baseline main commit is
 `56a2f85e46de9c4b3c2ae23a3fd9ba1aa01ceefd`.
 [CI 161](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46135404161)
 reported 258 passed, 94 skipped and 4 warnings before this addition.
-The property/coverage workflow must complete successfully before merge.
+[CI 172](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46136043998)
+verified 267 passed, 94 skipped, 4 warnings, all nine property tests and
+both reproducibility sweeps. PR 11 merged at `7deb8489098443b6cc52352062d8a5d1160dc04b`.
+The extended validation workflow must pass before its own merge.
+
+## Additional hardening
+
+- 200 generated examples per property, with deterministic settings.
+- Invalid inputs, sign/scale invariants, row permutation and batch splitting,
+  bounded stress workloads up to K=8193, and FP64 metric overflow rejection.
+- Strict Mypy checking scoped to the coverage utility; not repository-wide typing.
+- SciPy IQR, NumPy median/worst errors and Matplotlib synthetic trade-off plots
+  grouped by matched configuration. Three seeds provide descriptive summaries,
+  not confidence intervals or statistical evidence of model-level improvement.
+- CI artifacts include raw sweep, descriptive JSON, PNG, coverage and JUnit.
+- Opt-in GPU acceptance requires CUDA, Triton, Ampere+ and BF16; it fails
+  when requested hardware is absent rather than silently skipping.
+
+Run the scientific report from a sweep JSON:
+
+```bash
+python -m neuroforge.quantization_report outputs/quantization_errors.json
+```
+
+Run strict GPU acceptance as described in the GPU validation protocol.
 
 GPU JIT execution, CUDA memory safety, and performance remain unverified.
 The [GPU validation protocol](GPU_VALIDATION.md) documents the proposed

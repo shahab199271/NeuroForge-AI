@@ -12,16 +12,26 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -e '.[dev]'
+      - run: python -m pip check
       - run: ruff check src tests
+      - name: Static type checking (coverage utility)
+        run: mypy --strict --follow-imports=silent src/neuroforge/kernel_coverage.py
       - name: Full regression and kernel branch coverage
         run: |
           mkdir -p outputs/validation
           pytest -q --cov=neuroforge.kernels --cov-branch --cov-report=term-missing --cov-report=json:outputs/validation/kernel-coverage.json --junitxml=outputs/validation/pytest.xml
+      - name: Coverage regression gates
+        run: python -m neuroforge.kernel_coverage outputs/validation/kernel-coverage.json --cpu-min 80 --whole-min 55
       - name: Independent numerical properties
         env:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
         run: pytest -q --hypothesis-show-statistics tests/test_kernel_properties.py
+      - name: Repeat contract and stress checks
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        run: pytest -q tests/test_kernel_hardening.py tests/test_kernel_coverage.py tests/test_quantization_report.py
       - name: Repeat numerical diagnostics
         run: |
           pytest -q -rs tests/test_error_analysis.py
@@ -30,6 +40,10 @@ jobs:
           python -m neuroforge.quantization_error_sweep --output /tmp/quantization-errors-second.json
           cmp /tmp/quantization-errors-first.json /tmp/quantization-errors-second.json
           python -c "import json; r=json.load(open('/tmp/quantization-errors-first.json')); assert len(r['rows']) == 144; print('Validated 144 deterministic diagnostic rows')"
+      - name: Scientific diagnostic report
+        run: |
+          cp /tmp/quantization-errors-first.json outputs/validation/quantization-errors.json
+          python -m neuroforge.quantization_report outputs/validation/quantization-errors.json --output-dir outputs/validation
       - name: Upload validation reports
         if: always()
         uses: actions/upload-artifact@v4
