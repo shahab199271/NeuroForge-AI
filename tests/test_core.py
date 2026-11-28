@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 from neuroforge.core import make_messages, parse_sentiment
 
 
