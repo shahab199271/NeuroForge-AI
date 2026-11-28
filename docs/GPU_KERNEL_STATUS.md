@@ -70,7 +70,9 @@ Offline FP64 error diagnostics separate reconstruction, operand rounding and
 execution error. The seeded CLI sweeps INT4/INT8, precision and group size.
 See [error analysis](GPU_KERNEL_PHASE3_ERROR_ANALYSIS.md). Validation of this
 initial addition passed [CI 115](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46134443233): 253 passed, 94 skipped, 4 warnings.
-The extended diagnostics and repeated sweep require their own CI result;
+The extended diagnostics passed [CI 126](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46134653472): 258 passed, 94 skipped, 4 warnings; two dedicated runs each passed 46 tests with 2 skips, and both 144-row sweeps were byte-identical.
+PR 9 merged at `24308f87e172969a1b49ac7ee367f5a1698fe09d`;
+
 no model accuracy or performance claim is made.
 
 ## Unverified and planned

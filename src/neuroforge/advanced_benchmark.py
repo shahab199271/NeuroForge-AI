@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Benchmark advanced forward operators; separate first call from steady state."""
 import argparse
 from dataclasses import asdict

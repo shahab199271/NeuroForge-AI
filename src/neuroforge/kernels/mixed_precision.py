@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Explicit operand precision for packed INT4 weight-only GEMM."""
 from __future__ import annotations
 

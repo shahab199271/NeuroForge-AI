@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Grouped INT4 quantization and independent byte-level packing kernels."""
 import torch
 import triton

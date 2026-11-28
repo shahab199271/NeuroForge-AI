@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """CUDA-event microbenchmarks; excludes compilation and warm-up from timings."""
 import argparse
 import json

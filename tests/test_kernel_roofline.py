@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 import pytest
 
 from neuroforge.kernel_roofline import effective_rates, gemm_cost, residual_cost, roofline, rope_cost

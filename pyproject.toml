@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "neuroforge-ai"
 version = "0.1.0"
+maintainers = [{name = "Shahab Baloochi"}]
 description = "Reproducible LLM fine-tuning, evaluation, benchmarking and serving"
 readme = "README.md"
 requires-python = ">=3.10"

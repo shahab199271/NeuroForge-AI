@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Analytical operator costs and an explicitly parameterized roofline model."""
 from dataclasses import dataclass
 import math

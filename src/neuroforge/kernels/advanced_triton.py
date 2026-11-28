@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Experimental NVIDIA Triton kernels; GPU execution not yet validated."""
 import torch
 import triton

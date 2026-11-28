@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Symmetric grouped INT8 storage along the last axis."""
 from __future__ import annotations
 

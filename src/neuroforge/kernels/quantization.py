@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Symmetric row-wise INT8 storage with FP32 scales and reconstruction."""
 from __future__ import annotations
 

@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Forward-only Triton kernels; fp32 arithmetic and masked tail loads."""
 import torch
 import triton

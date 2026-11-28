@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Weight-only INT4 matrix multiplication with FP32 accumulation.
 
 Weights use the phase 3.3 [N, ceil(K/2)] row-packed format.

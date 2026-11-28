@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Symmetric grouped INT4 storage. Low nibble precedes high nibble."""
 from __future__ import annotations
 
