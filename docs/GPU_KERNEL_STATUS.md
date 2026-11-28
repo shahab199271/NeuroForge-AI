@@ -80,8 +80,13 @@ no model accuracy or performance claim is made.
 PR 10 passed [CI 161](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46135404161):
 258 passed, 94 skipped, 4 warnings; repeated 144-row reports were identical.
 The new property tests, NumPy oracles and branch coverage are described in
-[engineering validation](KERNEL_ENGINEERING_VALIDATION.md). New CI evidence
-is required before merging the engineering validation change.
+[engineering validation](KERNEL_ENGINEERING_VALIDATION.md). [CI 172](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46136043998)
+passed 267 tests (94 skipped, 4 warnings), nine property tests and the repeated
+sweep; combined kernel coverage was 56%, including GPU-only files at 0%.
+PR 11 merged at `7deb8489098443b6cc52352062d8a5d1160dc04b`.
+The next hardening revision adds scoped coverage gates, stress/metamorphic
+checks, scoped Mypy, scientific reports and strict GPU acceptance.
+Its own CI evidence and real GPU execution remain pending.
 
 ## Unverified and planned
 
