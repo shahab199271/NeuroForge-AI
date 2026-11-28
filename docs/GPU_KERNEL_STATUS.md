@@ -58,7 +58,7 @@ without modifying packed INT4 weights or FP32 scales. The default policy
 preserves phase 3.4 semantics. FP32 accumulation and output remain fixed.
 Auto selection is a hardware/range heuristic, not a measured optimum.
 See [mixed precision contract](GPU_KERNEL_PHASE3_MIXED_PRECISION.md) for
-repeated CPU tests (33 dedicated passes, 179 kernel regression passes).
+the API contract and verified CI evidence.
 [CI 104](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46046434817)
 reported 212 passed, 92 skipped, 4 warnings in 4.98s; Ruff passed.
 PR 8 merged at `3de985822b8239dabbccd5feffcf50d10dd93270`.
@@ -74,6 +74,14 @@ The extended diagnostics passed [CI 126](https://github.com/shahab199271/NeuroFo
 PR 9 merged at `24308f87e172969a1b49ac7ee367f5a1698fe09d`;
 
 no model accuracy or performance claim is made.
+
+## Advanced engineering validation
+
+PR 10 passed [CI 161](https://github.com/shahab199271/NeuroForge-AI/actions/runs/46135404161):
+258 passed, 94 skipped, 4 warnings; repeated 144-row reports were identical.
+The new property tests, NumPy oracles and branch coverage are described in
+[engineering validation](KERNEL_ENGINEERING_VALIDATION.md). New CI evidence
+is required before merging the engineering validation change.
 
 ## Unverified and planned
 
