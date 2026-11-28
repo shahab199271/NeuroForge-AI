@@ -1,3 +1,6 @@
+# NeuroForge AI
+# Maintainer: Shahab Baloochi
+
 """Shared prompts, strict sentiment parsing, and model inference."""
 from __future__ import annotations
 
