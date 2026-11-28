@@ -197,3 +197,22 @@ def test_cli_sweep(tmp_path, monkeypatch):
     assert {r['distribution'] for r in report['rows']} == {'normal', 'outlier'}
     main()
     assert first == out.read_bytes()
+
+
+def test_relative_l2_representable_after_intermediate_overflow():
+    reference = torch.full((4,), 1e-309, dtype=torch.float64)
+    estimate = reference.clone()
+    estimate[0] = 0.2
+    metrics = error_metrics(reference, estimate)
+    assert metrics.relative_l2 == pytest.approx(1e308, rel=1e-12)
+
+
+def test_relative_l2_representable_after_intermediate_underflow():
+    reference = torch.zeros(17, dtype=torch.float64)
+    reference[0] = 1e308
+    estimate = reference.clone()
+    estimate[1:] = 1e-16
+    metrics = error_metrics(reference, estimate)
+    # The true ratio is approximately 4e-324, which rounds to the
+    # smallest positive binary64 number, not zero.
+    assert metrics.relative_l2 == math.ulp(0.0)
