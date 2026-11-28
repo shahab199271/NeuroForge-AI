@@ -10,19 +10,26 @@ INT8 kernel. INT4 calls the phase 3.5 API with the chosen backend.
 
 Let A and W denote the original floating-point inputs, Q the FP32 weight
 reconstruction, and Ar and Wr the rounded operands (including weight
-saturation). Three reference products are evaluated on CPU in FP64:
+saturation). Four reference products are evaluated on CPU in FP64:
 
 - Y0 = A W^T: original input reference.
 - Yq = A Q^T: reconstruction-only reference.
+- Ya = Ar Q^T: activation-rounded reference.
 - Yr = Ar Wr^T: rounded operand reference.
 
 The actual output Y is evaluated using the requested execution path.
 Report weight reconstruction (Q versus W), quantization output (Yq versus
-Y0), operand output (Yr versus Yq), execution (Y versus Yr), and total
+Y0), activation output (Ya versus Yq), weight operand output (Yr versus Ya),
+combined operand output (Yr versus Yq), execution (Y versus Yr), and total
 output (Y versus Y0). Signed residuals telescope, but their scalar norms
 do not generally add. CPU FP64 is a high-precision reference, not exact
 real arithmetic. All reference operands are copied to CPU; this is not
 a hot-path diagnostic or latency benchmark.
+
+Operand tensor metrics and counts of nonzero values rounded to zero, weight
+saturation and reconstructed zeros are also recorded. Attribution is ordered:
+activation rounding precedes weight rounding, so interaction effects depend on
+that ordering.
 
 Each comparison includes count, MAE, RMSE, maximum absolute error, signed
 bias (estimate minus reference), relative L2 norm, and cosine similarity.
@@ -68,4 +75,7 @@ pytest -q -rs
 
 Tests include known analytical errors, zero norms, extreme FP64 values,
 invalid/nonfinite inputs, odd groups and storage, explicit precisions,
-and CUDA cases when available. GPU runtime validation remains pending.
+and CUDA cases when available. CI 115 passed the initial implementation
+(253 passed, 94 skipped, 4 warnings). The extended suite and repeated full
+sweep are checked by the updated CI workflow; results for that revision
+remain pending. GPU runtime validation remains pending.
