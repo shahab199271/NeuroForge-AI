@@ -38,15 +38,16 @@ flowchart LR
 | --- | --- |
 | Implementation | Python, Triton language, PyTorch |
 | LLM adaptation | Hugging Face Transformers, PEFT, Accelerate, optional bitsandbytes |
-| Numerical validation | NumPy FP64 references, PyTorch FP64 diagnostics |
-| Automated testing | pytest, Hypothesis property tests, pytest-cov / coverage.py |
-| Quality and automation | Ruff, GitHub Actions, YAML, Bash |
+| Numerical validation | NumPy FP64 references, PyTorch FP64 diagnostics, SciPy descriptive statistics, Matplotlib trade-off plots |
+| Automated testing | pytest, Hypothesis property and metamorphic tests, pytest-cov / coverage.py, bounded stress tests |
+| Quality and automation | Ruff, scoped Mypy checking, GitHub Actions, YAML, Bash |
 | Serving and packaging | FastAPI, Pydantic, Uvicorn, setuptools, Docker |
 | GPU target (runtime unverified) | NVIDIA CUDA, Triton JIT; Compute Sanitizer protocol |
 
 See [engineering validation](docs/KERNEL_ENGINEERING_VALIDATION.md) for scope,
-commands, evidence and limitations. The advanced CPU checks are implemented
-in the validation branch; their CI result must be checked before merging.
+commands, evidence and limitations. CI 172 verified the initial property tests and coverage workflow. Extended
+stress tests, coverage gates, scientific reports and opt-in GPU acceptance
+are subject to their own CI and hardware validation.
 
 ## Experimental GPU kernels
 
